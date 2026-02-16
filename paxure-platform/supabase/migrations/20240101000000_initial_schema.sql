@@ -13,16 +13,19 @@ BEGIN
 END $$;
 
 -- Custom types
-DO $$ BEGIN
-  CREATE TYPE user_role AS ENUM (
-    'business_developer',
-    'operationeel_verantwoordelijke',
-    'coach',
-    'hulpcoach',
-    'maatwerker'
-  );
-EXCEPTION
-  WHEN duplicate_object THEN null;
+-- Create user_role enum if it doesn't exist
+-- If it exists, we assume it has the correct values (or they were added by other migrations)
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN
+    CREATE TYPE user_role AS ENUM (
+      'business_developer',
+      'operationeel_verantwoordelijke',
+      'coach',
+      'hulpcoach',
+      'maatwerker'
+    );
+  END IF;
 END $$;
 
 DO $$ BEGIN

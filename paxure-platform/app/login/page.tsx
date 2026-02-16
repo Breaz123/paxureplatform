@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -52,7 +53,15 @@ export default function LoginPage() {
         router.push('/dashboard')
       }
     } catch (err) {
-      setError('Er is een fout opgetreden bij het inloggen.')
+      const message = err instanceof Error ? err.message : 'Er is een fout opgetreden bij het inloggen.'
+      if (message === 'Failed to fetch') {
+        setError(
+          'Kan geen verbinding maken met de server. Controleer je internetverbinding. ' +
+          'Als je Supabase gebruikt: controleer of je project actief is (niet gepauzeerd) op dashboard.supabase.com.'
+        )
+      } else {
+        setError(message)
+      }
       setLoading(false)
     }
   }
@@ -87,7 +96,19 @@ export default function LoginPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Wachtwoord</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Wachtwoord</Label>
+                <Link 
+                  href="/forgot-password" 
+                  className="text-sm text-primary hover:underline"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    router.push('/forgot-password')
+                  }}
+                >
+                  Wachtwoord vergeten?
+                </Link>
+              </div>
               <Input
                 id="password"
                 type="password"

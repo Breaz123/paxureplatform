@@ -11,8 +11,10 @@ import type { Profile, Opleiding } from '@/lib/types'
 export const dynamic = 'force-dynamic'
 
 const roleLabels: Record<string, string> = {
+  admin: 'Admin',
   business_developer: 'Business Developer',
   operationeel_verantwoordelijke: 'Operationeel Verantwoordelijke',
+  administratief_bediende: 'Administratief Bediende',
   coach: 'Coach',
   hulpcoach: 'Hulpcoach',
   maatwerker: 'Maatwerker',
@@ -114,6 +116,14 @@ export default async function MedewerkerDetailsPage({
                 {roleLabels[medewerker.role] || medewerker.role}
               </Badge>
             </div>
+            {medewerker.werkdagen_per_week && medewerker.werkdagen_per_week !== 5 && (
+              <div>
+                <p className="text-sm font-medium mb-1">Werkdagen per Week</p>
+                <Badge variant="secondary">
+                  {medewerker.werkdagen_per_week}/5
+                </Badge>
+              </div>
+            )}
             <div>
               <p className="text-sm font-medium mb-2">Capaciteiten</p>
               <div className="space-y-2">

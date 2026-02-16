@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
 import { createClient } from '@/lib/supabase/client'
 import type { Profile, UserRole } from '@/lib/types'
 import { VaardighedenTagsInput } from '@/components/ui/vaardigheden-tags-input'
@@ -14,6 +15,7 @@ import { VaardighedenTagsInput } from '@/components/ui/vaardigheden-tags-input'
 const roleOptions: { value: UserRole; label: string }[] = [
   { value: 'business_developer', label: 'Business Developer' },
   { value: 'operationeel_verantwoordelijke', label: 'Operationeel Verantwoordelijke' },
+  { value: 'administratief_bediende', label: 'Administratief Bediende' },
   { value: 'coach', label: 'Coach' },
   { value: 'hulpcoach', label: 'Hulpcoach' },
   { value: 'maatwerker', label: 'Maatwerker' },
@@ -49,7 +51,25 @@ export default function MedewerkerBewerkenPage() {
     capaciteiten_goed: [] as string[],
     capaciteiten_gemiddeld: [] as string[],
     capaciteiten_slecht: [] as string[],
+    werkdagen_per_week: 5.0,
+    werkdagen_regime: '',
+    werkdagen_dagen: [] as string[],
   })
+
+  const dagen = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag']
+  
+  const regimeOpties = [
+    { value: 'Ma-Vr', label: 'Ma-Vr (5 dagen)', dagen: ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag'] },
+    { value: 'Ma-Do', label: 'Ma-Do (4 dagen)', dagen: ['maandag', 'dinsdag', 'woensdag', 'donderdag'] },
+    { value: 'Ma-Wo', label: 'Ma-Wo (3 dagen)', dagen: ['maandag', 'dinsdag', 'woensdag'] },
+    { value: 'Ma-Di', label: 'Ma-Di (2 dagen)', dagen: ['maandag', 'dinsdag'] },
+    { value: 'Ma', label: 'Ma (1 dag)', dagen: ['maandag'] },
+    { value: 'Di-Vr', label: 'Di-Vr (4 dagen)', dagen: ['dinsdag', 'woensdag', 'donderdag', 'vrijdag'] },
+    { value: 'Di-Do', label: 'Di-Do (3 dagen)', dagen: ['dinsdag', 'woensdag', 'donderdag'] },
+    { value: 'Wo-Vr', label: 'Wo-Vr (3 dagen)', dagen: ['woensdag', 'donderdag', 'vrijdag'] },
+    { value: 'Do-Vr', label: 'Do-Vr (2 dagen)', dagen: ['donderdag', 'vrijdag'] },
+    { value: 'custom', label: 'Aangepast', dagen: [] },
+  ]
 
   useEffect(() => {
     async function loadMedewerker() {
@@ -73,6 +93,9 @@ export default function MedewerkerBewerkenPage() {
             capaciteiten_goed: data.capaciteiten_goed || [],
             capaciteiten_gemiddeld: data.capaciteiten_gemiddeld || [],
             capaciteiten_slecht: data.capaciteiten_slecht || [],
+            werkdagen_per_week: data.werkdagen_per_week ?? 5.0,
+            werkdagen_regime: data.werkdagen_regime || '',
+            werkdagen_dagen: data.werkdagen_dagen || [],
           })
         }
       } catch (err) {
@@ -109,12 +132,20 @@ export default function MedewerkerBewerkenPage() {
         .eq('id', user.id)
         .single()
 
-      const allowedRoles = ['coach', 'hulpcoach', 'operationeel_verantwoordelijke', 'business_developer']
+      const allowedRoles = ['admin', 'coach', 'hulpcoach', 'administratief_bediende', 'operationeel_verantwoordelijke', 'business_developer']
       const canManage = userProfile && allowedRoles.includes(userProfile.role)
 
-      // Allow users to update their own profile, or coaches to update any profile
+      // Allow users to update their own profile, or coaches/admin to update any profile
       if (!canManage && user.id !== medewerkerId) {
         setError('Je hebt geen rechten om deze medewerker te bewerken. Alleen coaches en hogere rollen kunnen medewerkers bewerken.')
+        setSubmitting(false)
+        return
+      }
+
+      // Validate that selected days match werkdagen_per_week
+      const werkdagenDagen = formData.werkdagen_dagen || []
+      if (werkdagenDagen.length !== formData.werkdagen_per_week) {
+        setError(`Het aantal geselecteerde dagen (${werkdagenDagen.length}) komt niet overeen met het aantal werkdagen per week (${formData.werkdagen_per_week}).`)
         setSubmitting(false)
         return
       }
@@ -127,6 +158,9 @@ export default function MedewerkerBewerkenPage() {
           capaciteiten_goed: formData.capaciteiten_goed.length > 0 ? formData.capaciteiten_goed : null,
           capaciteiten_gemiddeld: formData.capaciteiten_gemiddeld.length > 0 ? formData.capaciteiten_gemiddeld : null,
           capaciteiten_slecht: formData.capaciteiten_slecht.length > 0 ? formData.capaciteiten_slecht : null,
+          werkdagen_per_week: formData.werkdagen_per_week,
+          werkdagen_regime: formData.werkdagen_regime || null,
+          werkdagen_dagen: werkdagenDagen.length > 0 ? werkdagenDagen : null,
         })
         .eq('id', medewerkerId)
 
@@ -256,6 +290,145 @@ export default function MedewerkerBewerkenPage() {
               <p className="text-sm text-muted-foreground">
                 Categoriseer vaardigheden per niveau. Dit helpt om te bepalen wie welke opleiding nodig heeft.
               </p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="werkdagen_per_week">Werkdagen per Week</Label>
+                <Select
+                  value={(() => {
+                    const val = formData.werkdagen_per_week ?? 5.0
+                    // Normalize to match SelectItem values exactly
+                    if (val === 5) return '5.0'
+                    if (val === 4) return '4.0'
+                    if (val === 3) return '3.0'
+                    if (val === 2.5) return '2.5'
+                    if (val === 2) return '2.0'
+                    if (val === 1) return '1.0'
+                    return val.toString()
+                  })()}
+                  onValueChange={(value) => {
+                    const newWerkdagen = parseFloat(value)
+                    const huidigeDagen = formData.werkdagen_dagen || []
+                    setFormData({ 
+                      ...formData, 
+                      werkdagen_per_week: newWerkdagen,
+                      // Reset regime and days if the number doesn't match
+                      werkdagen_regime: huidigeDagen.length === newWerkdagen ? formData.werkdagen_regime : '',
+                      werkdagen_dagen: huidigeDagen.length === newWerkdagen ? huidigeDagen : [],
+                    })
+                  }}
+                >
+                  <SelectTrigger id="werkdagen_per_week">
+                    <SelectValue placeholder="Selecteer werkdagen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5.0">5/5 (Voltijd)</SelectItem>
+                    <SelectItem value="4.0">4/5</SelectItem>
+                    <SelectItem value="3.0">3/5</SelectItem>
+                    <SelectItem value="2.5">2.5/5</SelectItem>
+                    <SelectItem value="2.0">2/5</SelectItem>
+                    <SelectItem value="1.0">1/5</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-sm text-muted-foreground">
+                  Aantal werkdagen per week dat deze medewerker werkt
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="werkdagen_regime">Regime</Label>
+                <Select
+                  value={formData.werkdagen_regime}
+                  onValueChange={(value) => {
+                    const selectedRegime = regimeOpties.find(r => r.value === value)
+                    if (selectedRegime && selectedRegime.value !== 'custom') {
+                      setFormData({ 
+                        ...formData, 
+                        werkdagen_regime: value,
+                        werkdagen_dagen: selectedRegime.dagen,
+                        werkdagen_per_week: selectedRegime.dagen.length,
+                      })
+                    } else {
+                      setFormData({ 
+                        ...formData, 
+                        werkdagen_regime: value,
+                      })
+                    }
+                  }}
+                >
+                  <SelectTrigger id="werkdagen_regime">
+                    <SelectValue placeholder="Selecteer regime" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {regimeOpties.map((regime) => (
+                      <SelectItem key={regime.value} value={regime.value}>
+                        {regime.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-sm text-muted-foreground">
+                  Selecteer een standaard regime of kies "Aangepast" om dagen handmatig te selecteren
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Werkdagen</Label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {dagen.map((dag) => {
+                    const werkdagenDagen = formData.werkdagen_dagen || []
+                    const isSelected = werkdagenDagen.includes(dag)
+                    const maxDagen = formData.werkdagen_per_week
+                    const huidigeAantal = werkdagenDagen.length
+                    
+                    return (
+                      <div key={dag} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`dag-${dag}`}
+                          checked={isSelected}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              // Check if we can add more days
+                              if (huidigeAantal >= maxDagen) {
+                                setError(`Je kunt maximaal ${maxDagen} dag(en) selecteren.`)
+                                return
+                              }
+                              setFormData({
+                                ...formData,
+                                werkdagen_dagen: [...werkdagenDagen, dag],
+                                werkdagen_regime: formData.werkdagen_regime === 'custom' ? 'custom' : '',
+                              })
+                            } else {
+                              setFormData({
+                                ...formData,
+                                werkdagen_dagen: werkdagenDagen.filter(d => d !== dag),
+                                werkdagen_regime: formData.werkdagen_regime === 'custom' ? 'custom' : '',
+                              })
+                            }
+                            setError(null)
+                          }}
+                          disabled={!isSelected && huidigeAantal >= maxDagen}
+                        />
+                        <Label
+                          htmlFor={`dag-${dag}`}
+                          className="text-sm font-normal cursor-pointer capitalize"
+                        >
+                          {dag}
+                        </Label>
+                      </div>
+                    )
+                  })}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Geselecteerd: {(formData.werkdagen_dagen || []).length} van {formData.werkdagen_per_week} dag(en)
+                  {(formData.werkdagen_dagen || []).length !== formData.werkdagen_per_week && (
+                    <span className="text-destructive ml-2">
+                      (Selecteer {formData.werkdagen_per_week - (formData.werkdagen_dagen || []).length} dag(en) meer)
+                    </span>
+                  )}
+                </p>
+              </div>
             </div>
 
             <div className="flex justify-end gap-4">

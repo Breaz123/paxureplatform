@@ -1,6 +1,8 @@
 export type UserRole = 
+  | 'admin'
   | 'business_developer'
   | 'operationeel_verantwoordelijke'
+  | 'administratief_bediende'
   | 'coach'
   | 'hulpcoach'
   | 'maatwerker'
@@ -33,6 +35,9 @@ export interface Profile {
   capaciteiten_goed: string[] | null
   capaciteiten_gemiddeld: string[] | null
   capaciteiten_slecht: string[] | null
+  werkdagen_per_week: number | null
+  werkdagen_regime: string | null
+  werkdagen_dagen: string[] | null
   created_at: string
   updated_at: string
 }
@@ -131,41 +136,63 @@ export interface Weekplanning {
   id: string
   week_start: string
   week_einde: string
-  maandag_pickers: string[] | null
-  maandag_inpakkers: string[] | null
+  // New structure
+  maandag_pick: string[] | null
+  maandag_pack: string[] | null
   maandag_controle: string[] | null
-  maandag_outbound: string[] | null
-  maandag_transport: string[] | null
   maandag_vas: string[] | null
+  maandag_coaches: string[] | null
+  maandag_administratie: string[] | null
   maandag_afwezigheden: string | null
-  dinsdag_pickers: string[] | null
-  dinsdag_inpakkers: string[] | null
+  dinsdag_pick: string[] | null
+  dinsdag_pack: string[] | null
   dinsdag_controle: string[] | null
-  dinsdag_outbound: string[] | null
-  dinsdag_transport: string[] | null
   dinsdag_vas: string[] | null
+  dinsdag_coaches: string[] | null
+  dinsdag_administratie: string[] | null
   dinsdag_afwezigheden: string | null
-  woensdag_pickers: string[] | null
-  woensdag_inpakkers: string[] | null
+  woensdag_pick: string[] | null
+  woensdag_pack: string[] | null
   woensdag_controle: string[] | null
-  woensdag_outbound: string[] | null
-  woensdag_transport: string[] | null
   woensdag_vas: string[] | null
+  woensdag_coaches: string[] | null
+  woensdag_administratie: string[] | null
   woensdag_afwezigheden: string | null
-  donderdag_pickers: string[] | null
-  donderdag_inpakkers: string[] | null
+  donderdag_pick: string[] | null
+  donderdag_pack: string[] | null
   donderdag_controle: string[] | null
-  donderdag_outbound: string[] | null
-  donderdag_transport: string[] | null
   donderdag_vas: string[] | null
+  donderdag_coaches: string[] | null
+  donderdag_administratie: string[] | null
   donderdag_afwezigheden: string | null
-  vrijdag_pickers: string[] | null
-  vrijdag_inpakkers: string[] | null
+  vrijdag_pick: string[] | null
+  vrijdag_pack: string[] | null
   vrijdag_controle: string[] | null
-  vrijdag_outbound: string[] | null
-  vrijdag_transport: string[] | null
   vrijdag_vas: string[] | null
+  vrijdag_coaches: string[] | null
+  vrijdag_administratie: string[] | null
   vrijdag_afwezigheden: string | null
+  // Legacy columns (for backwards compatibility during migration)
+  maandag_pickers?: string[] | null
+  maandag_inpakkers?: string[] | null
+  maandag_outbound?: string[] | null
+  maandag_transport?: string[] | null
+  dinsdag_pickers?: string[] | null
+  dinsdag_inpakkers?: string[] | null
+  dinsdag_outbound?: string[] | null
+  dinsdag_transport?: string[] | null
+  woensdag_pickers?: string[] | null
+  woensdag_inpakkers?: string[] | null
+  woensdag_outbound?: string[] | null
+  woensdag_transport?: string[] | null
+  donderdag_pickers?: string[] | null
+  donderdag_inpakkers?: string[] | null
+  donderdag_outbound?: string[] | null
+  donderdag_transport?: string[] | null
+  vrijdag_pickers?: string[] | null
+  vrijdag_inpakkers?: string[] | null
+  vrijdag_outbound?: string[] | null
+  vrijdag_transport?: string[] | null
   speciale_leveringen: string | null
   colruyt_transport: string | null
   wie_rijdt: string | null
@@ -206,6 +233,18 @@ export interface Evaluatie {
   updated_at: string
 }
 
+export interface Meeting {
+  id: string
+  titel: string
+  datum: string
+  notities: string | null
+  actiepunten: string[] | null
+  aanwezigen: string | null
+  created_by: string
+  created_at: string
+  updated_at: string
+}
+
 export interface Notificatie {
   id: string
   user_id: string
@@ -215,5 +254,20 @@ export interface Notificatie {
   link: string | null
   gelezen: boolean
   created_at: string
+}
+
+export interface Verlof {
+  id: string
+  medewerker_id: string
+  start_datum: string
+  eind_datum: string
+  type: string
+  opmerking: string | null
+  goedgekeurd: boolean
+  goedgekeurd_door: string | null
+  goedgekeurd_op: string | null
+  created_by: string | null
+  created_at: string
+  updated_at: string
 }
 

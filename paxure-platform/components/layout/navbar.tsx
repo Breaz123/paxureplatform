@@ -26,6 +26,7 @@ const navigation = [
   { name: 'Klanten', href: '/klanten' },
   { name: 'Medewerkers', href: '/medewerkers' },
   { name: 'Coaching', href: '/coaching' },
+  { name: 'Meetings', href: '/meetings' },
 ]
 
 export function Navbar() {

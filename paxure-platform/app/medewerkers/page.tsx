@@ -11,8 +11,10 @@ import type { Profile } from '@/lib/types'
 export const dynamic = 'force-dynamic'
 
 const roleLabels: Record<string, string> = {
+  admin: 'Admin',
   business_developer: 'Business Developer',
   operationeel_verantwoordelijke: 'Operationeel Verantwoordelijke',
+  administratief_bediende: 'Administratief Bediende',
   coach: 'Coach',
   hulpcoach: 'Hulpcoach',
   maatwerker: 'Maatwerker',
