@@ -1,13 +1,14 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { updateSession } from '@/lib/supabase/middleware'
 
-export async function middleware(request: NextRequest) {
-  // Skip middleware if Supabase env vars are not set (during build)
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    return NextResponse.next()
-  }
-  
-  return await updateSession(request)
+// NOTE:
+// We previously used Supabase session handling inside middleware via
+// `@/lib/supabase/middleware`, but that module is not supported in
+// Edge Functions on Vercel and caused deployment failures.
+//
+// For now, middleware is a no-op and all auth is handled inside
+// server components (see `getCurrentUser` in `lib/auth.ts`).
+export function middleware(_request: NextRequest) {
+  return NextResponse.next()
 }
 
 export const config = {
