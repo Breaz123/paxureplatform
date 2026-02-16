@@ -15,28 +15,13 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [supabaseReady, setSupabaseReady] = useState(false)
   const router = useRouter()
-  
-  useEffect(() => {
-    // Check if Supabase is configured
-    if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      setSupabaseReady(true)
-    } else {
-      setError('Supabase is niet geconfigureerd. Controleer je .env.local bestand.')
-    }
-  }, [])
   
   const supabase = createClient()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    if (!supabaseReady) {
-      setError('Supabase is niet geconfigureerd.')
-      return
-    }
-    
+
     setLoading(true)
     setError(null)
 
