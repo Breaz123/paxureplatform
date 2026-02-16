@@ -18,6 +18,12 @@ export const metadata: Metadata = {
   description: "E-fulfilment platform voor Paxure",
 };
 
+// Force all routes to be dynamically rendered on the server.
+// This avoids static pre-rendering during the build step, which can
+// fail if environment variables (like Supabase keys) are not available
+// at export time.
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({
   children,
 }: Readonly<{
