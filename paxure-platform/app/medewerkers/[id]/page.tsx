@@ -131,7 +131,7 @@ export default async function MedewerkerDetailsPage({
                   <div>
                     <p className="text-xs font-medium text-green-700 dark:text-green-400 mb-1">Goed:</p>
                     <div className="flex flex-wrap gap-1">
-                      {medewerker.capaciteiten_goed.map((cap) => (
+                      {medewerker.capaciteiten_goed.map((cap: string) => (
                         <Badge key={cap} variant="default" className="text-xs bg-green-600 hover:bg-green-700">
                           {cap} ✓
                         </Badge>
@@ -143,7 +143,7 @@ export default async function MedewerkerDetailsPage({
                   <div>
                     <p className="text-xs font-medium text-yellow-700 dark:text-yellow-400 mb-1">Gemiddeld:</p>
                     <div className="flex flex-wrap gap-1">
-                      {medewerker.capaciteiten_gemiddeld.map((cap) => (
+                      {medewerker.capaciteiten_gemiddeld.map((cap: string) => (
                         <Badge key={cap} variant="secondary" className="text-xs bg-yellow-600 hover:bg-yellow-700">
                           {cap} ~
                         </Badge>
@@ -155,7 +155,7 @@ export default async function MedewerkerDetailsPage({
                   <div>
                     <p className="text-xs font-medium text-red-700 dark:text-red-400 mb-1">Training nodig:</p>
                     <div className="flex flex-wrap gap-1">
-                      {medewerker.capaciteiten_slecht.map((cap) => (
+                      {medewerker.capaciteiten_slecht.map((cap: string) => (
                         <Badge key={cap} variant="destructive" className="text-xs">
                           {cap} ✗
                         </Badge>
@@ -189,7 +189,7 @@ export default async function MedewerkerDetailsPage({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {alleCapaciteiten.map((cap) => {
+                  {alleCapaciteiten.map((cap: string) => {
                     const laatste = capaciteitMap.get(cap)
                     const isGoed = medewerker.capaciteiten_goed?.includes(cap)
                     const isGemiddeld = medewerker.capaciteiten_gemiddeld?.includes(cap)
@@ -285,7 +285,7 @@ export default async function MedewerkerDetailsPage({
                         <TableCell className="font-medium">{opleiding.taak}</TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
-                            {(opleiding.capaciteiten_vereist || []).map((cap) => (
+                            {(opleiding.capaciteiten_vereist || []).map((cap: string) => (
                               <Badge key={cap} variant="secondary" className="text-xs">
                                 {cap}
                               </Badge>

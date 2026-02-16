@@ -85,10 +85,10 @@ export default async function OpleidingDetailsPage({
   if (medewerkers && vereisteCapaciteiten.length > 0) {
     medewerkers.forEach((medewerker: Profile) => {
       // Check if medewerker has any required capaciteit in slecht or gemiddeld
-      const heeftSlecht = vereisteCapaciteiten.some((cap) => 
+      const heeftSlecht = vereisteCapaciteiten.some((cap: string) => 
         medewerker.capaciteiten_slecht?.includes(cap)
       )
-      const heeftGemiddeld = vereisteCapaciteiten.some((cap) => 
+      const heeftGemiddeld = vereisteCapaciteiten.some((cap: string) => 
         medewerker.capaciteiten_gemiddeld?.includes(cap)
       )
       
@@ -201,7 +201,7 @@ export default async function OpleidingDetailsPage({
               <div>
                 <p className="text-sm font-medium mb-1">Vereiste Capaciteiten:</p>
                 <div className="flex flex-wrap gap-1">
-                  {opleiding.capaciteiten_vereist.map((cap) => (
+                  {opleiding.capaciteiten_vereist.map((cap: string) => (
                     <Badge key={cap} variant="secondary" className="text-xs">
                       {cap}
                     </Badge>
