@@ -5,7 +5,13 @@ export function createClient() {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables. Please check your .env.local file.')
+    // In production this should never happen because Vercel env vars are set.
+    // If it does, fail softly on the client instead of crashing the whole app.
+    console.error(
+      'Supabase client: missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY. ' +
+      'Check your environment configuration.'
+    )
+    return createBrowserClient('', '')
   }
 
   return createBrowserClient(supabaseUrl, supabaseAnonKey)

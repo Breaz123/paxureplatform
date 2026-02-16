@@ -8,7 +8,26 @@ export async function createClient() {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables. Please check your .env.local file.')
+    // Avoid crashing the whole app at build/runtime if env vars are missing.
+    // Log a clear error and return a client pointing at an empty URL/key.
+    console.error(
+      'Supabase server client: missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY. ' +
+      'Check your environment configuration.'
+    )
+    return createServerClient(
+      '',
+      '',
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll()
+          },
+          setAll() {
+            // no-op when misconfigured
+          },
+        },
+      }
+    )
   }
 
   return createServerClient(
